@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">EasyAssist</string>
+    <string name="send_mode_1">Call Assistant</string>
+    <string name="send_mode_2">Close Chat</string>
+</resources>

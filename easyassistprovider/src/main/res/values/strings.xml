@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">easyAssistProvider</string>
+    <string name="send_mode_1">Kiosk 1</string>
+    <string name="send_mode_2">Kiosk 2</string>
+</resources>

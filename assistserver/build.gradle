@@ -1,0 +1,44 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.9.RELEASE")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+
+jar {
+    baseName = 'assistance-websocket'
+    version = '0.1.0'
+}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+//    compile("org.springframework.boot:spring-boot-starter-integration")
+//    compile("org.springframework.boot:spring-boot-starter-web")
+//    compile("org.springframework:spring-messaging")
+//    compile("org.springframework.integration:spring-integration-amqp:3.0.1.RELEASE")
+//    compile("org.projectreactor:reactor-tcp:1.0.0.RELEASE")
+
+    compile("org.springframework.boot:spring-boot-starter-websocket")
+    compile("org.webjars:webjars-locator")
+    compile("org.webjars:sockjs-client:1.0.2")
+    compile("org.webjars:stomp-websocket:2.3.3")
+    compile("org.webjars:bootstrap:3.3.7")
+    compile("org.webjars:jquery:3.1.0")
+    compile("io.projectreactor:reactor-core")
+    compile("io.projectreactor:reactor-net")
+    compile("io.netty:netty-all:4.1.6.Final")
+
+
+    testCompile("org.springframework.boot:spring-boot-starter-test")
+}

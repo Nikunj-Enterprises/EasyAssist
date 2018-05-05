@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/EasyAssist.iml" filepath="$PROJECT_DIR$/EasyAssist.iml" />
+      <module fileurl="file://C:\work\android_workspace\EasyAssist\EasyAssist\easyAssist\app.iml" filepath="C:\work\android_workspace\EasyAssist\EasyAssist\easyAssist\app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/assistserver/assistserver.iml" filepath="$PROJECT_DIR$/assistserver/assistserver.iml" />
+      <module fileurl="file://$PROJECT_DIR$/easyAssist/easyAssist.iml" filepath="$PROJECT_DIR$/easyAssist/easyAssist.iml" />
+      <module fileurl="file://$PROJECT_DIR$/easyassistprovider/easyassistprovider.iml" filepath="$PROJECT_DIR$/easyassistprovider/easyassistprovider.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib/lib.iml" filepath="$PROJECT_DIR$/lib/lib.iml" />
+    </modules>
+  </component>
+</project>
