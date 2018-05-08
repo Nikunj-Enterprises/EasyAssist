@@ -5,13 +5,16 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -37,7 +40,7 @@ import in.nikunj.easyassistprovider.model.HelpRequested;
 import ua.naiksoftware.stomp.Stomp;
 import ua.naiksoftware.stomp.client.StompClient;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements RecyclerViewKioskAdapter.KioskItemListener {
 
     private static final String TAG = "MainActivity";
 
@@ -49,19 +52,22 @@ public class MainActivity extends AppCompatActivity {
     private final SimpleDateFormat mTimeFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
     private RecyclerView mRecyclerView;
     private Gson mGson = new GsonBuilder().create();
-    private Button btn_kiosk_1,btn_kiosk_2;
+    //private Button btn_kiosk_1, btn_kiosk_2;
     //gets set through messaging
     private static String HELP_SEEKER_ID;
     //gets set through menu
-    private static String HELP_PROVIDER_ID = "helper1" ;
+    private static String HELP_PROVIDER_ID = "helper1";
     //gets set through menu
-    private static String WS_SERVER_IP_PORT ="192.168.0.11:8080";
+    private static String WS_SERVER_IP_PORT = "192.168.0.11:8080"; //"35.154.43.60:8085";//
 
     private Animation animation;
 
     TextView helpCallingText;
     EditText chatEditText;
     Button chatMsgSendBtn;
+    private RecyclerView listOfKiosk;
+    private RecyclerViewKioskAdapter recyclerViewKioskAdapter;
+    private GridLayoutManager gridLayoutManager;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -80,14 +86,50 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_server:
                 showAlert(MainActivity.this, "server");
                 return true;
+            case R.id.add_kiosk:
+                addNewKiosk();
+
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+    private void addNewKiosk() {
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MainActivity.this);
+        final LayoutInflater inflater = getLayoutInflater();
+        final View dialog = inflater.inflate(R.layout.kiosk_layout, null);
+        dialogBuilder.setCancelable(false);
+        dialogBuilder.setView(dialog);
+        final AlertDialog alertDialog = dialogBuilder.create();
+        final EditText kioskName = (EditText) dialog.findViewById(R.id.kiosk_name);
+        final EditText kioskId = (EditText) dialog.findViewById(R.id.kiosk_id);
+
+
+        final Window window = alertDialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        Button back = (Button) dialog.findViewById(R.id.back);
+
+        back.setOnClickListener(v -> alertDialog.dismiss());
+
+        Button submit = (Button) dialog.findViewById(R.id.submit);
+        submit.setOnClickListener(v -> {
+            final String id = kioskId.getText().toString();
+            final String name = kioskName.getText().toString();
+            if (!id.isEmpty() && !name.isEmpty()) {
+                kioskDataSets.add(new KioskDataSet(name, id));
+                recyclerViewKioskAdapter.notifyDataSetChanged();
+                alertDialog.dismiss();
+            }
+        });
+        alertDialog.show();
+    }
+
     public void showAlert(Context activityContext, String type) {
         final EditText editText = new EditText(activityContext);
-        final AlertDialog builder = new AlertDialog.Builder(activityContext,R.style.Theme_AppCompat_Dialog)
+        final AlertDialog builder = new AlertDialog.Builder(activityContext)
                 .setPositiveButton("ok", null)
                 .setNegativeButton("cancel", null)
                 .create();
@@ -102,14 +144,15 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         if (!editText.getText().toString().isEmpty()) {
-                            if("user".equals(type)){
+                            if ("user".equals(type)) {
                                 HELP_PROVIDER_ID = editText.getText().toString();
-                            }else if("server".equals(type)){
+                            } else if ("server".equals(type)) {
                                 WS_SERVER_IP_PORT = editText.getText().toString();
                             }
                             Toast.makeText(activityContext, "Enter a user name", Toast.LENGTH_SHORT).show();
                             disconnectStomp(v);
                             connectStomp();
+                            builder.dismiss();
                         } else {
                             Log.d(TAG, "You have entered: " + editText.getText().toString());
                             builder.dismiss();
@@ -132,11 +175,20 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
+    private List<KioskDataSet> kioskDataSets = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        listOfKiosk = (RecyclerView) findViewById(R.id.list_of_kiosk);
+        gridLayoutManager = new GridLayoutManager(this, 2);
+        listOfKiosk.setLayoutManager(gridLayoutManager);
+        kioskDataSets.add(new KioskDataSet("KIOSK 1", "kiosk1"));
+        kioskDataSets.add(new KioskDataSet("KIOSK 2", "kiosk2"));
+        recyclerViewKioskAdapter = new RecyclerViewKioskAdapter(this, kioskDataSets);
+        listOfKiosk.setAdapter(recyclerViewKioskAdapter);
         mAdapter = new SimpleAdapter(mDataSet);
         mAdapter.setHasStableIds(true);
         mRecyclerView.setAdapter(mAdapter);
@@ -145,8 +197,8 @@ public class MainActivity extends AppCompatActivity {
         chatEditText = (EditText) findViewById(R.id.editText);
         chatMsgSendBtn = (Button) findViewById(R.id.btn_send);
 
-        btn_kiosk_1=(Button) findViewById(R.id.btn_kiosk_1);
-        btn_kiosk_2=(Button)findViewById(R.id.btn_kiosk_2);
+        //btn_kiosk_1 = (Button) findViewById(R.id.btn_kiosk_1);
+        //btn_kiosk_2 = (Button) findViewById(R.id.btn_kiosk_2);
 
         animation = AnimationUtils.loadAnimation(MainActivity.this, R.anim.bounce);
         connectStomp();
@@ -157,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void connectStomp() {
-        mStompClient = Stomp.over(WebSocket.class, "ws://"+WS_SERVER_IP_PORT+"/assistance-websocket/websocket");
+        mStompClient = Stomp.over(WebSocket.class, "ws://" + WS_SERVER_IP_PORT + "/assistance-websocket/websocket");
 
         mStompClient.lifecycle()
                 .subscribeOn(Schedulers.io())
@@ -186,39 +238,47 @@ public class MainActivity extends AppCompatActivity {
                     //
                     try {
                         HelpRequested assistanceMsg = mGson.fromJson(topicMessage.getPayload(), HelpRequested.class);
-                        if( assistanceMsg.getHelpSeekerId() != null ) {
+                        if (assistanceMsg.getHelpSeekerId() != null) {
                             String helpSeekerId = assistanceMsg.getHelpSeekerId();
-                            if( assistanceMsg.getAcknowledgedBy() == null ) {
+                            if (assistanceMsg.getAcknowledgedBy() == null) {
                                 //Highlight respective kiosk
-                                if( helpSeekerId.equalsIgnoreCase("kiosk1") ) {
-                                    btn_kiosk_1.startAnimation(animation);
+                                final List<KioskDataSet> allKioskData = recyclerViewKioskAdapter.getAllKioskData();
+                                if (allKioskData != null) {
+                                    for (int itr = 0; itr < allKioskData.size(); itr++) {
 
-                                }else if( helpSeekerId.equalsIgnoreCase("kiosk2") ) {
-                                    btn_kiosk_2.startAnimation(animation);
+                                        KioskDataSet kioskDataSet = allKioskData.get(itr);
+                                        if (helpSeekerId.equalsIgnoreCase(kioskDataSet.getKioskId())) {
 
+                                            View viewByPosition = gridLayoutManager.findViewByPosition(itr);
+                                            viewByPosition.startAnimation(animation);
+                                        }
+                                    }
                                 }
-                            }else if( assistanceMsg.getAcknowledgedBy() != null ) {
-                                // stop animation for respective kiosk
-                                if( helpSeekerId.equalsIgnoreCase("kiosk1") ) {
-                                    btn_kiosk_1.clearAnimation();
+                            }else if(assistanceMsg.getAcknowledgedBy() != null && !assistanceMsg.getAcknowledgedBy().isEmpty()) {
+                                final List<KioskDataSet> allKioskData = recyclerViewKioskAdapter.getAllKioskData();
+                                if (allKioskData != null) {
+                                    for (int itr = 0; itr < allKioskData.size(); itr++) {
 
-                                }else if( helpSeekerId.equalsIgnoreCase("kiosk2") ) {
-                                    btn_kiosk_2.clearAnimation();
+                                        KioskDataSet kioskDataSet = allKioskData.get(itr);
+                                        if (helpSeekerId.equalsIgnoreCase(kioskDataSet.getKioskId())) {
 
-                                }
-                                if( assistanceMsg.getAcknowledgedBy().equals(HELP_PROVIDER_ID) ) {
-                                    //Open chat window
-                                    openChatScreen(helpSeekerId);
+                                            View viewByPosition = gridLayoutManager.findViewByPosition(itr);
+                                            viewByPosition.clearAnimation();
+                                            if(assistanceMsg.getAcknowledgedBy().equals(HELP_PROVIDER_ID)){
+                                                openChatScreen(helpSeekerId);
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }catch (Exception e){
-                        toast("Error Observed: "+e.getMessage());
+                    } catch (Exception e) {
+                        toast("Error Observed: " + e.getMessage());
                     }
                 });
 
         //Receive chat messages
-        mStompClient.topic("/topic/assistance/"+HELP_PROVIDER_ID)
+        mStompClient.topic("/topic/assistance/" + HELP_PROVIDER_ID)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(topicMessage -> {
@@ -227,38 +287,27 @@ public class MainActivity extends AppCompatActivity {
                     //display received chat messages
                     try {
                         ChatMessage chatMsg = mGson.fromJson(topicMessage.getPayload(), ChatMessage.class);
-                        addChatMessage(chatMsg.getRepliedBy()+": "+chatMsg.getMessage());
-                    }catch (Exception e){
-                        toast("Error Observed Chat Msg : "+e.getMessage());
+                        addChatMessage(chatMsg.getRepliedBy() + ": " + chatMsg.getMessage());
+                    } catch (Exception e) {
+                        toast("Error Observed Chat Msg : " + e.getMessage());
                     }
                 });
 
         mStompClient.connect();
     }
 
-    public void acknowledgeHelpRequest(View view) {
-//        HELP_SEEKER_ID = "kiosk1"; // Id from kiosk selected
-        HELP_SEEKER_ID = view.getTag().toString();
-        HelpRequested requested = new HelpRequested();
-        requested.setHelpSeekerId(HELP_SEEKER_ID);
-        requested.setAcknowledgedBy(HELP_PROVIDER_ID);
 
-        mStompClient.send("/assistance/"+HELP_SEEKER_ID+"/acknowledged/"+HELP_PROVIDER_ID, mGson.toJson(requested))
-                .compose(applySchedulers())
-                .subscribe(aVoid -> {
-                    Log.d(TAG, "STOMP echo send successfully");
-                }, throwable -> {
-                    Log.e(TAG, "Error send STOMP echo", throwable);
-                    toast(throwable.getMessage());
-                });
+    public void acknowledgeHelpRequest(View view) {
+        HELP_SEEKER_ID = view.getTag().toString();
+        acknowledgeHelpRequest(HELP_SEEKER_ID);
     }
 
-    public void sendStompChatMsg(View view){
-        EditText editText = (EditText)findViewById(R.id.editText);
+    public void sendStompChatMsg(View view) {
+        EditText editText = (EditText) findViewById(R.id.editText);
         String message = editText.getText().toString();
         editText.setText("");
 
-        mStompClient.send("/assistance/"+HELP_PROVIDER_ID+"/chat/"+HELP_SEEKER_ID, message)
+        mStompClient.send("/assistance/" + HELP_PROVIDER_ID + "/chat/" + HELP_SEEKER_ID, message)
                 .compose(applySchedulers())
                 .subscribe(aVoid -> {
                     Log.d(TAG, "STOMP chat send successfully");
@@ -267,18 +316,19 @@ public class MainActivity extends AppCompatActivity {
                     toast(throwable.getMessage());
                 });
 
-        addChatMessage(HELP_PROVIDER_ID+ ": "+ message);
+        addChatMessage(HELP_PROVIDER_ID + ": " + message);
     }
 
-    public void closeChatSession(View view){
+    public void closeChatSession(View view) {
         mDataSet.clear();
         mAdapter.notifyDataSetChanged();
         HELP_SEEKER_ID = "";
-
-        findViewById(R.id.btn_kiosk_1).setVisibility(View.VISIBLE);
+       /* findViewById(R.id.btn_kiosk_1).setVisibility(View.VISIBLE);
         findViewById(R.id.btn_kiosk_1).clearAnimation();
         findViewById(R.id.btn_kiosk_2).setVisibility(View.VISIBLE);
-        findViewById(R.id.btn_kiosk_2).clearAnimation();
+        findViewById(R.id.btn_kiosk_2).clearAnimation();*/
+        mRecyclerView.setVisibility(View.GONE);
+        listOfKiosk.setVisibility(View.VISIBLE);
         findViewById(R.id.btn_end).setVisibility(View.GONE);
         findViewById(R.id.editText).setVisibility(View.GONE);
         findViewById(R.id.btn_send).setVisibility(View.GONE);
@@ -289,9 +339,12 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
     }
 
-    private void openChatScreen(String helpAskedBy) {
-        findViewById(R.id.btn_kiosk_1).setVisibility(View.GONE);
-        findViewById(R.id.btn_kiosk_2).setVisibility(View.GONE);
+    private void openChatScreen(String helpAskedBy) {//chat visible on and selected all kiosk visible gone
+
+        mRecyclerView.setVisibility(View.VISIBLE);
+        listOfKiosk.setVisibility(View.GONE);
+      /*  findViewById(R.id.btn_kiosk_1).setVisibility(View.GONE);
+        findViewById(R.id.btn_kiosk_2).setVisibility(View.GONE);*/
         findViewById(R.id.btn_end).setVisibility(View.VISIBLE);
         findViewById(R.id.editText).setVisibility(View.VISIBLE);
         findViewById(R.id.btn_send).setVisibility(View.VISIBLE);
@@ -299,7 +352,7 @@ public class MainActivity extends AppCompatActivity {
         HELP_SEEKER_ID = helpAskedBy;
     }
 
-    private void addChatMessage(String msg){
+    private void addChatMessage(String msg) {
         mDataSet.add(msg);
         mAdapter.notifyDataSetChanged();
         mRecyclerView.smoothScrollToPosition(mDataSet.size() - 1);
@@ -316,5 +369,26 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         mStompClient.disconnect();
         super.onDestroy();
+    }
+
+    @Override
+    public void itemOnClick(KioskDataSet kioskDataSet) {
+        acknowledgeHelpRequest(kioskDataSet.getKioskId());
+    }
+
+    private void acknowledgeHelpRequest(String idVal) {
+        HELP_SEEKER_ID = idVal;
+        HelpRequested requested = new HelpRequested();
+        requested.setHelpSeekerId(HELP_SEEKER_ID);
+        requested.setAcknowledgedBy(HELP_PROVIDER_ID);
+
+        mStompClient.send("/assistance/"+HELP_SEEKER_ID+"/acknowledged/"+HELP_PROVIDER_ID, mGson.toJson(requested))
+                .compose(applySchedulers())
+                .subscribe(aVoid -> {
+                    Log.d(TAG, "STOMP echo send successfully");
+                }, throwable -> {
+                    Log.e(TAG, "Error send STOMP echo", throwable);
+                    toast(throwable.getMessage());
+                });
     }
 }

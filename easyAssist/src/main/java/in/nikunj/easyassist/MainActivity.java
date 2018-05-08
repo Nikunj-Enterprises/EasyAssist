@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private Gson mGson = new GsonBuilder().create();
 
     //gets set through menu
-    private static String HELP_SEEKER_ID = "kiosk1";
+    private static volatile String HELP_SEEKER_ID = "kiosk1";
     //gets set through messaging
     private static String HELP_PROVIDER_ID;
     //gets set through menu
@@ -62,6 +62,10 @@ public class MainActivity extends AppCompatActivity {
     TextView helpCallingText;
     EditText chatEditText;
     Button chatMsgSendBtn;
+
+    public static void setHelpSeekerId(String helpSeekerId) {
+        HELP_SEEKER_ID = helpSeekerId;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
