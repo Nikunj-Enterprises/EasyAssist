@@ -11,7 +11,7 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <activity
-            android:name="in.nikunj.easyassist.LoginActivity"
+            android:name=".LoginActivity"
             android:label="@string/app_name">
             <!--android:screenOrientation="landscape"-->
             <intent-filter>
@@ -23,7 +23,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name="in.nikunj.easyassist.MainActivity">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
