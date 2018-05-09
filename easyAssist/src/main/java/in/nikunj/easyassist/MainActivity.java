@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     //gets set through menu
     private static volatile String HELP_SEEKER_ID = "kiosk1";
     //gets set through messaging
-    private static String HELP_PROVIDER_ID;
+    private String HELP_PROVIDER_ID;
     //gets set through menu
     private static String WS_SERVER_IP_PORT ="192.168.0.11:8080";
 
@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new SimpleAdapter(mDataSet);
         mAdapter.setHasStableIds(true);
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, true));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
         helpCallingText = (TextView) findViewById(R.id.txt_help);
         chatEditText = (EditText) findViewById(R.id.editText);
@@ -276,7 +276,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addChatMessage(String msg){
-        mDataSet.add(msg);
+        mDataSet.add(msg.trim());
         mAdapter.notifyDataSetChanged();
         mRecyclerView.smoothScrollToPosition(mDataSet.size() - 1);
     }

@@ -54,9 +54,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewKiosk
     private Gson mGson = new GsonBuilder().create();
     //private Button btn_kiosk_1, btn_kiosk_2;
     //gets set through messaging
-    private static String HELP_SEEKER_ID;
+    private String HELP_SEEKER_ID;
     //gets set through menu
-    private static String HELP_PROVIDER_ID = "helper1";
+    private static volatile String HELP_PROVIDER_ID = "helper1";
     //gets set through menu
     private static String WS_SERVER_IP_PORT = "192.168.0.11:8080"; //"35.154.43.60:8085";//
 
@@ -69,6 +69,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewKiosk
     private RecyclerViewKioskAdapter recyclerViewKioskAdapter;
     private GridLayoutManager gridLayoutManager;
 
+    public static void setHelpProviderId(String helperId){
+        HELP_PROVIDER_ID = helperId;
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -185,14 +188,14 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewKiosk
         listOfKiosk = (RecyclerView) findViewById(R.id.list_of_kiosk);
         gridLayoutManager = new GridLayoutManager(this, 2);
         listOfKiosk.setLayoutManager(gridLayoutManager);
-        kioskDataSets.add(new KioskDataSet("KIOSK 1", "kiosk1"));
-        kioskDataSets.add(new KioskDataSet("KIOSK 2", "kiosk2"));
+        //kioskDataSets.add(new KioskDataSet("KIOSK 1", "kiosk1"));
+        //kioskDataSets.add(new KioskDataSet("KIOSK 2", "kiosk2"));
         recyclerViewKioskAdapter = new RecyclerViewKioskAdapter(this, kioskDataSets);
         listOfKiosk.setAdapter(recyclerViewKioskAdapter);
         mAdapter = new SimpleAdapter(mDataSet);
         mAdapter.setHasStableIds(true);
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, true));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
         chatEditText = (EditText) findViewById(R.id.editText);
         chatMsgSendBtn = (Button) findViewById(R.id.btn_send);
@@ -243,14 +246,21 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewKiosk
                             if (assistanceMsg.getAcknowledgedBy() == null) {
                                 //Highlight respective kiosk
                                 final List<KioskDataSet> allKioskData = recyclerViewKioskAdapter.getAllKioskData();
+                                if ( !helpSeekerId.isEmpty()) {
+                                    KioskDataSet data = new KioskDataSet(helpSeekerId, helpSeekerId);
+                                    if( ! kioskDataSets.contains(data)) {
+                                        kioskDataSets.add(new KioskDataSet(helpSeekerId, helpSeekerId));
+                                        recyclerViewKioskAdapter.notifyDataSetChanged();
+                                    }
+                                }
                                 if (allKioskData != null) {
                                     for (int itr = 0; itr < allKioskData.size(); itr++) {
-
                                         KioskDataSet kioskDataSet = allKioskData.get(itr);
                                         if (helpSeekerId.equalsIgnoreCase(kioskDataSet.getKioskId())) {
-
                                             View viewByPosition = gridLayoutManager.findViewByPosition(itr);
-                                            viewByPosition.startAnimation(animation);
+                                            if(viewByPosition != null) {
+                                                viewByPosition.startAnimation(animation);
+                                            }
                                         }
                                     }
                                 }
@@ -353,7 +363,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewKiosk
     }
 
     private void addChatMessage(String msg) {
-        mDataSet.add(msg);
+        mDataSet.add(msg.trim());
         mAdapter.notifyDataSetChanged();
         mRecyclerView.smoothScrollToPosition(mDataSet.size() - 1);
     }
