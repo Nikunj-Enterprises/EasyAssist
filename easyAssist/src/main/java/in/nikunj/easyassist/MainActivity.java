@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     //gets set through messaging
     private String HELP_PROVIDER_ID;
     //gets set through menu
-    private static String WS_SERVER_IP_PORT ="192.168.0.11:8080";
+    private static String WS_SERVER_IP_PORT ="18.236.135.76:8080";
 
     private Animation animation;
 

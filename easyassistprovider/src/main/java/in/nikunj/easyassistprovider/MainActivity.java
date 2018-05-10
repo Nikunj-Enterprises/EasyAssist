@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewKiosk
     //gets set through menu
     private static volatile String HELP_PROVIDER_ID = "helper1";
     //gets set through menu
-    private static String WS_SERVER_IP_PORT = "192.168.0.11:8080"; //"35.154.43.60:8085";//
+    private static String WS_SERVER_IP_PORT = "18.236.135.76:8080"; //"35.154.43.60:8085";//
 
     private Animation animation;
 
@@ -271,11 +271,13 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewKiosk
 
                                         KioskDataSet kioskDataSet = allKioskData.get(itr);
                                         if (helpSeekerId.equalsIgnoreCase(kioskDataSet.getKioskId())) {
-
                                             View viewByPosition = gridLayoutManager.findViewByPosition(itr);
                                             viewByPosition.clearAnimation();
+
                                             if(assistanceMsg.getAcknowledgedBy().equals(HELP_PROVIDER_ID)){
                                                 openChatScreen(helpSeekerId);
+                                            }else{
+                                                HELP_SEEKER_ID = null;
                                             }
                                         }
                                     }
@@ -313,6 +315,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewKiosk
     }
 
     public void sendStompChatMsg(View view) {
+        if(HELP_SEEKER_ID == null || HELP_SEEKER_ID.isEmpty())
+            return;
+
         EditText editText = (EditText) findViewById(R.id.editText);
         String message = editText.getText().toString();
         editText.setText("");
@@ -350,6 +355,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewKiosk
     }
 
     private void openChatScreen(String helpAskedBy) {//chat visible on and selected all kiosk visible gone
+        if(HELP_SEEKER_ID == null || HELP_SEEKER_ID.isEmpty())
+            return;
 
         mRecyclerView.setVisibility(View.VISIBLE);
         listOfKiosk.setVisibility(View.GONE);
@@ -388,6 +395,10 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewKiosk
 
     private void acknowledgeHelpRequest(String idVal) {
         HELP_SEEKER_ID = idVal;
+
+        if(HELP_SEEKER_ID == null || HELP_SEEKER_ID.isEmpty())
+            return;
+
         HelpRequested requested = new HelpRequested();
         requested.setHelpSeekerId(HELP_SEEKER_ID);
         requested.setAcknowledgedBy(HELP_PROVIDER_ID);
