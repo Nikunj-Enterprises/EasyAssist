@@ -29,7 +29,7 @@
             $("#loginBtn").click(function() {
                if($("#password").val() == "password" && $("#userId").val() !== ""){
                   var userId = $("#userId").val();
-                  $("#clientId").text(userId);
+                  $("#clientId").val(userId);
                   $("#chat").hide();
                   $("#caller").show();
                   $("#loginDiv").hide();
@@ -46,6 +46,13 @@
                disconnect();
                closeChatWindow();
             });
+
+            $("#send").click(function() {
+               sendChatMessage($("#message").val());
+               $("#message").text("");
+            });
+
+
             var timer;
             var stompClient;
 
@@ -79,11 +86,14 @@
                         var msgObj = JSON.parse(message.body);
                         var raisedBy = msgObj.helpSeekerId;
                         var ackedBy = msgObj.acknowledgedBy;
-                        if(raisedBy === $("#clientId") && ackedBy !== ""){
+                        console.log("raisedBy: "+raisedBy+", ackedBy: "+ackedBy);
+                        if(raisedBy == $("#clientId").val() && ackedBy !== ""){
+                           $("#helperId").val(ackedBy);
                            startChat(ackedBy);
                         }
+                        console.log("clientId: "+$("#clientId").val()+", helperId: "+$("#helperId").val());
                     });
-                    var p2pTopic = "/topic/assistance/"+$(#clientId);
+                    var p2pTopic = "/topic/assistance/"+$("#clientId").val();
                     subscribe(p2pTopic, function(message){
                         console.log(message);
                         var msgObj = JSON.parse(message.body);
@@ -92,6 +102,7 @@
                         var content = msgObj.message;
                         addChatMessage(repliedBy, content);
                     });
+                    stompClient.send("/assistance/requested/"+$("#clientId").val(),{}, JSON.stringify( {"helpSeekerId" : $("#clientId").val()}));
                 });
             };
 
@@ -103,20 +114,22 @@
             };
 
             function subscribe(topic, callbackFn){
-               stompClient.subscribe(topic, callbackFn);
+                stompClient.subscribe(topic, callbackFn);
             };
 
             function sendChatMessage(message){
-
+                stompClient.send("/assistance/"+$("#clientId").val()+"/chat/"+$("#helperId").val(),{}, message);
+                addChatMessage($("#clientId").val(), message);
             };
 
             function addChatMessage(user, message){
-
+                 $("#chatbox").append("<div>"+user+": "+message+"</div>");
             };
 
             function closeChatWindow(){
                 $("#chat").hide();
                 $("#caller").show();
+                $("#helperId").val("");
             };
         });
     </script>
@@ -125,6 +138,7 @@
             enabled. Please enable
             Javascript and reload this page!</h2></noscript>
         <input id="clientId" type="hidden">
+        <input id="helperId" type="hidden">
         <div id="main-content" class="container">
             <div id="application"><u>EasyAssist</u></div>
             <br/>
