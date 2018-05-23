@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Easy Assist</title>
+        <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/main.css" rel="stylesheet">
+        <script src="/webjars/jquery/jquery.min.js"></script>
+        <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+        <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+        <style>
+            .chatbox{
+                height: 200px;
+                border: 25px black;
+                padding: 25px;
+                margin: 25px;
+            }
+            .container{
+                height: 300px;
+                border: 25px black;
+            }
+        </style>
+    </head>
+    <script>
+        $(document).ready(function(){
+            $("#chat").hide();
+            $("#caller").hide();
+            $("#loginDiv").show();
+
+            $("#loginBtn").click(function() {
+               if($("#password").val() == "password" && $("#userId").val() !== ""){
+                  var userId = $("#userId").val();
+                  $("#clientId").text(userId);
+                  $("#chat").hide();
+                  $("#caller").show();
+                  $("#loginDiv").hide();
+               }
+            });
+
+            $("#callBtn").click(function() {
+               connect();
+               $("#callBtn").text("Calling for Assistance");
+               blinking($("#callBtn"));
+            });
+
+            $("#closechat").click(function() {
+               disconnect();
+               closeChatWindow();
+            });
+            var timer;
+            var stompClient;
+
+            function blinking(elm){
+                timer = setInterval(blink, 10);
+                function blink(){
+                   elm.fadeOut(400, function(){
+                      elm.fadeIn(400);
+                   });
+                }
+            };
+            function stopBlinking(){
+               $("#callBtn").text("Click to call for Assistance");
+               clearInterval(timer);
+            };
+
+            function startChat(helperId){
+               stopBlinking();
+               $("#caller").hide();
+               $("#chat").show();
+            };
+
+            function connect() {
+                var socket = new SockJS('/assistance-websocket');
+                stompClient = Stomp.over(socket);
+                stompClient.connect({}, function (frame) {
+                    console.log("connected");
+                    subscribe("/topic/assistance",function(message){
+                        stopBlinking();
+                        console.log(message);
+                        var msgObj = JSON.parse(message.body);
+                        var raisedBy = msgObj.helpSeekerId;
+                        var ackedBy = msgObj.acknowledgedBy;
+                        if(raisedBy === $("#clientId") && ackedBy !== ""){
+                           startChat(ackedBy);
+                        }
+                    });
+                    var p2pTopic = "/topic/assistance/"+$(#clientId);
+                    subscribe(p2pTopic, function(message){
+                        console.log(message);
+                        var msgObj = JSON.parse(message.body);
+                        var repliedBy = msgObj.repliedBy;
+                        var repliedTo = msgObj.repliedTo;
+                        var content = msgObj.message;
+                        addChatMessage(repliedBy, content);
+                    });
+                });
+            };
+
+            function disconnect() {
+                if (stompClient !== null) {
+                    stompClient.disconnect();
+                }
+                console.log("Disconnected");
+            };
+
+            function subscribe(topic, callbackFn){
+               stompClient.subscribe(topic, callbackFn);
+            };
+
+            function sendChatMessage(message){
+
+            };
+
+            function addChatMessage(user, message){
+
+            };
+
+            function closeChatWindow(){
+                $("#chat").hide();
+                $("#caller").show();
+            };
+        });
+    </script>
+    <body>
+        <noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
+            enabled. Please enable
+            Javascript and reload this page!</h2></noscript>
+        <input id="clientId" type="hidden">
+        <div id="main-content" class="container">
+            <div id="application"><u>EasyAssist</u></div>
+            <br/>
+            <div id="loginDiv">
+                UserId  : <span/><input id="userId" type="text">
+                Password: <span/><input id="password" type="text">
+                <br/>
+                <button id="loginBtn">Login</button>
+            </div>
+            <div id="caller">
+                <button id="callBtn">Click to call for Assistance</button>
+            </div>
+            <div id="chat">
+                <button id="closechat">Close Chat</button>
+                <br/>
+                <div id="chatbox" class="chatbox"></div>
+                <br/>
+                <div id="sender">
+                    <input id="message" type="text"/><button id="send">send</button>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
