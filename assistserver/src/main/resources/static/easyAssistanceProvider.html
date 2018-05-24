@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Easy Assistance Provider</title>
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/main.css" rel="stylesheet">
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <style>
+            .chatbox{
+                height: 200px;
+                border: 25px black;
+                padding: 25px;
+                margin: 25px;
+            }
+            .container{
+                height: 300px;
+                border: 25px black;
+            }
+        </style>
+</head>
+<script>
+        $(document).ready(function(){
+            $("#chat").hide();
+            $("#callerDiv").hide();
+            $("#loginDiv").show();
+
+            $("#loginBtn").click(function() {
+               if($("#password").val() == "password" && $("#userId").val() !== ""){
+                  var userId = $("#userId").val();
+                  $("#clientId").val(userId);
+                  $("#chat").hide();
+                  $("#callerDiv").show();
+                  $("#loginDiv").hide();
+                  connect();
+               }
+            });
+
+            $("#closechat").click(function() {
+               disconnect();
+               closeChatWindow();
+            });
+
+            $("#send").click(function() {
+               sendChatMessage($("#message").val());
+               $("#message").text("");
+               $("#message").val("");
+            });
+
+
+            var timer;
+            var stompClient;
+
+            function blinking(elm){
+                timer = setInterval(blink, 10);
+                function blink(){
+                   elm.fadeOut(400, function(){
+                      elm.fadeIn(400);
+                   });
+                }
+            };
+
+            function startChat(){
+               stopBlinking();
+               var message = JSON.stringify({"helpSeekerId":$("#callerId").val(), "acknowledgedBy":$("#clientId").val()});
+               stompClient.send("/assistance/"+$("#callerId").val()+"/acknowledged/"+$("#clientId").val(),{}, message);
+               $("#callerDiv").hide();
+               $("#chat").show();
+            };
+
+            function connect() {
+                var socket = new SockJS('/assistance-websocket');
+                stompClient = Stomp.over(socket);
+                stompClient.connect({}, function (frame) {
+                    console.log("connected");
+                    subscribe("/topic/assistance",function(message){
+                        console.log(message);
+                        var msgObj = JSON.parse(message.body);
+                        var raisedBy = msgObj.helpSeekerId;
+                        var ackedBy = msgObj.acknowledgedBy;
+                        console.log("raisedBy: "+raisedBy+", ackedBy: "+ackedBy);
+                        if(ackedBy == null || ackedBy == ""){
+                           if(raisedBy !== null && raisedBy !== ""){
+                               addCaller(raisedBy);
+                           }
+                        }else{
+                           stopBlinking();
+                        }
+                    });
+                    var p2pTopic = "/topic/assistance/"+$("#clientId").val();
+                    subscribe(p2pTopic, function(message){
+                        console.log(message);
+                        var msgObj = JSON.parse(message.body);
+                        var repliedBy = msgObj.repliedBy;
+                        var repliedTo = msgObj.repliedTo;
+                        var content = msgObj.message;
+                        if(repliedTo == $("#clientId").val()){
+                            addChatMessage(repliedBy, content);
+                        }
+                    });
+                });
+            };
+
+            function disconnect() {
+                if (stompClient !== null) {
+                    stompClient.disconnect();
+                }
+                console.log("Disconnected");
+            };
+
+            function subscribe(topic, callbackFn){
+                stompClient.subscribe(topic, callbackFn);
+            };
+
+            function sendChatMessage(message){
+                stompClient.send("/assistance/"+$("#clientId").val()+"/chat/"+$("#callerId").val(),{}, message);
+                addChatMessage($("#clientId").val(), message);
+            };
+
+            function addChatMessage(user, message){
+                 $("#chatbox").append("<div>"+user+": "+message+"</div>");
+            };
+
+            function closeChatWindow(){
+                $("#chat").hide();
+                $("#callerDiv").show();
+                $("#callerId").val("");
+            };
+
+            function addCaller(callerId){
+                var btn = $("#"+callerId);
+                console.log("addCaller called from "+callerId+" and btn is "+btn[0]);
+                if( btn == null || btn[0] == null || btn[0] == ""){
+                    console.log("appending to caller div");
+                    $("#callerDiv").append("<button id='"+callerId+"' >"+callerId+"</button>");
+                }
+                $("#callerId").val(callerId);
+                blinking($("#"+callerId));
+                $("#"+callerId)[0].onclick=startChat;
+            };
+
+            function stopBlinking(){
+               clearInterval(timer);
+            };
+        });
+    </script>
+<body>
+<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
+    enabled. Please enable
+    Javascript and reload this page!</h2></noscript>
+<input id="clientId" type="hidden">
+<input id="callerId" type="hidden">
+<div id="main-content" class="container">
+    <div id="application"><u>EasyAssistProvider</u></div>
+    <br/>
+    <div id="loginDiv">
+        UserId  : <span/><input id="userId" type="text">
+        Password: <span/><input id="password" type="text">
+        <br/>
+        <button id="loginBtn">Login</button>
+    </div>
+    <div id="callerDiv">
+
+    </div>
+    <div id="chat">
+        <button id="closechat">Close Chat</button>
+        <br/>
+        <div id="chatbox" class="chatbox"></div>
+        <br/>
+        <div id="sender">
+            <input id="message" type="text"/><button id="send">send</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

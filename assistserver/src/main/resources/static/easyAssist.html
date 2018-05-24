@@ -23,7 +23,7 @@
     <script>
         $(document).ready(function(){
             $("#chat").hide();
-            $("#caller").hide();
+            $("#callerDiv").hide();
             $("#loginDiv").show();
 
             $("#loginBtn").click(function() {
@@ -31,7 +31,7 @@
                   var userId = $("#userId").val();
                   $("#clientId").val(userId);
                   $("#chat").hide();
-                  $("#caller").show();
+                  $("#callerDiv").show();
                   $("#loginDiv").hide();
                }
             });
@@ -50,6 +50,7 @@
             $("#send").click(function() {
                sendChatMessage($("#message").val());
                $("#message").text("");
+               $("#message").val("");
             });
 
 
@@ -71,7 +72,7 @@
 
             function startChat(helperId){
                stopBlinking();
-               $("#caller").hide();
+               $("#callerDiv").hide();
                $("#chat").show();
             };
 
@@ -81,15 +82,17 @@
                 stompClient.connect({}, function (frame) {
                     console.log("connected");
                     subscribe("/topic/assistance",function(message){
-                        stopBlinking();
                         console.log(message);
                         var msgObj = JSON.parse(message.body);
                         var raisedBy = msgObj.helpSeekerId;
                         var ackedBy = msgObj.acknowledgedBy;
                         console.log("raisedBy: "+raisedBy+", ackedBy: "+ackedBy);
-                        if(raisedBy == $("#clientId").val() && ackedBy !== ""){
-                           $("#helperId").val(ackedBy);
-                           startChat(ackedBy);
+                        if( ackedBy !== null && ackedBy !== ""){
+                           stopBlinking();
+                           if(raisedBy == $("#clientId").val()){
+                               $("#helperId").val(ackedBy);
+                               startChat(ackedBy);
+                           }
                         }
                         console.log("clientId: "+$("#clientId").val()+", helperId: "+$("#helperId").val());
                     });
@@ -100,7 +103,9 @@
                         var repliedBy = msgObj.repliedBy;
                         var repliedTo = msgObj.repliedTo;
                         var content = msgObj.message;
-                        addChatMessage(repliedBy, content);
+                        if(repliedBy !== null && repliedBy !== ""){
+                           addChatMessage(repliedBy, content);
+                        }
                     });
                     stompClient.send("/assistance/requested/"+$("#clientId").val(),{}, JSON.stringify( {"helpSeekerId" : $("#clientId").val()}));
                 });
@@ -128,7 +133,7 @@
 
             function closeChatWindow(){
                 $("#chat").hide();
-                $("#caller").show();
+                $("#callerDiv").show();
                 $("#helperId").val("");
             };
         });
@@ -148,7 +153,7 @@
                 <br/>
                 <button id="loginBtn">Login</button>
             </div>
-            <div id="caller">
+            <div id="callerDiv">
                 <button id="callBtn">Click to call for Assistance</button>
             </div>
             <div id="chat">
