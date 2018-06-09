@@ -1,1 +1,2 @@
-include ':easyAssist', ':assistserver', ':lib', ':easyassistprovider'
+include ':easyAssist', ':assistserver', ':lib', ':easyassistprovider', ':bloodline'
+include ':server:grpublisher'
