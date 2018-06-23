@@ -1,2 +1,6 @@
 include ':easyAssist', ':assistserver', ':lib', ':easyassistprovider', ':bloodline'
 include ':server:grpublisher'
+include ':server:usermgmnt'
+include ':server:authservice'
+include ':server:gateway'
+include ':server:eureka-service'
