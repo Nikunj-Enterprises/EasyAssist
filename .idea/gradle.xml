@@ -9,9 +9,16 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/assistserver" />
+            <option value="$PROJECT_DIR$/bloodline" />
             <option value="$PROJECT_DIR$/easyAssist" />
             <option value="$PROJECT_DIR$/easyassistprovider" />
             <option value="$PROJECT_DIR$/lib" />
+            <option value="$PROJECT_DIR$/server" />
+            <option value="$PROJECT_DIR$/server/authservice" />
+            <option value="$PROJECT_DIR$/server/eureka-service" />
+            <option value="$PROJECT_DIR$/server/gateway" />
+            <option value="$PROJECT_DIR$/server/grpublisher" />
+            <option value="$PROJECT_DIR$/server/usermgmnt" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

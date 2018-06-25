@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="com.android.support:support-media-compat-25.4.0">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.android/build-cache/6a96dc03cc2e0f855826954d71f3bfd4911433b8/output/res" />
+      <root url="jar://$USER_HOME$/.android/build-cache/6a96dc03cc2e0f855826954d71f3bfd4911433b8/output/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -4,9 +4,16 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/EasyAssist.iml" filepath="$PROJECT_DIR$/EasyAssist.iml" />
       <module fileurl="file://$PROJECT_DIR$/assistserver/assistserver.iml" filepath="$PROJECT_DIR$/assistserver/assistserver.iml" />
+      <module fileurl="file://$PROJECT_DIR$/server/authservice/authservice.iml" filepath="$PROJECT_DIR$/server/authservice/authservice.iml" />
+      <module fileurl="file://$PROJECT_DIR$/bloodline/bloodline.iml" filepath="$PROJECT_DIR$/bloodline/bloodline.iml" />
       <module fileurl="file://$PROJECT_DIR$/easyAssist/easyAssist.iml" filepath="$PROJECT_DIR$/easyAssist/easyAssist.iml" />
       <module fileurl="file://$PROJECT_DIR$/easyassistprovider/easyassistprovider.iml" filepath="$PROJECT_DIR$/easyassistprovider/easyassistprovider.iml" />
+      <module fileurl="file://$PROJECT_DIR$/server/eureka-service/eureka-service.iml" filepath="$PROJECT_DIR$/server/eureka-service/eureka-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/server/gateway/gateway.iml" filepath="$PROJECT_DIR$/server/gateway/gateway.iml" />
+      <module fileurl="file://$PROJECT_DIR$/server/grpublisher/grpublisher.iml" filepath="$PROJECT_DIR$/server/grpublisher/grpublisher.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib/lib.iml" filepath="$PROJECT_DIR$/lib/lib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/server/server.iml" filepath="$PROJECT_DIR$/server/server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/server/usermgmnt/usermgmnt.iml" filepath="$PROJECT_DIR$/server/usermgmnt/usermgmnt.iml" />
     </modules>
   </component>
 </project>
