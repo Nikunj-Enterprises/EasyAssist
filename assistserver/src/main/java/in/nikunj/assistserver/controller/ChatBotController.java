@@ -31,6 +31,7 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
 
 import java.lang.reflect.Type;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,8 +50,11 @@ public class ChatBotController {
     @RequestMapping(value = "/connect/{userId}", method = RequestMethod.GET )
     public void connectToChatBot(@PathVariable("userId") String userId){
         if(botRegistry.containsKey(userId)) {
+
             botRegistry.get(userId).interrupt();
             botRegistry.remove(userId);
+
+            System.out.println("botRegistry size is :"+botRegistry.size());
         }
         botRegistry.put(userId,
                 new Thread() {
@@ -99,13 +103,13 @@ public class ChatBotController {
                     class MyHandler extends StompSessionHandlerAdapter {
                         public void afterConnected(StompSession stompSession, StompHeaders stompHeaders) {
                             //logger.info("Now connected");
-                            try {
+                            /*try {
                                 subscribe(stompSession);
                             } catch (ExecutionException e) {
                                 e.printStackTrace();
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
-                            }
+                            }*/
                             String message =
                                     JSONObject.stringToValue( "{\"helpSeekerId\":\""+userId+"\", \"acknowledgedBy\":\"bot4"+userId+"\"}").toString();
                             messagingTemplate.convertAndSend("/topic/assistance", message);
@@ -114,29 +118,30 @@ public class ChatBotController {
 
                     @Override
                     public void run() {
-                        String resourcesPath = "C:\\work\\android_workspace\\EasyAssist\\assistserver\\src\\main\\resources";
+                        String resourcesPath = "C:/work/android_workspace/EasyAssist/assistserver/src/main/resources";
 
                         //MagicBooleans.trace_mode = TRACE_MODE;
                         Bot bot = new Bot("super", resourcesPath);
                         chatSession = new Chat(bot);
                         bot.brain.nodeStats();
-
+                        StompSession stompSession = null;
+                        long startTS = Calendar.getInstance().getTimeInMillis();
                         try {
-                            StompSession stompSession = connect().get();
-                            Thread.sleep(1000);
+                            stompSession = connect().get();
+                            Thread.sleep(500);
                             subscribe(stompSession);
                         }catch (Exception ex){
                             ex.printStackTrace();
                         }
 
-                        while (!isInterrupted){
+                        while (!isInterrupted
+                                && ((Calendar.getInstance().getTimeInMillis() - startTS) < 300000L )){
                             try {
                                 Thread.sleep(10000);
-                                if(isInterrupted()){
-                                    isInterrupted = true;
-                                }
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
+                                isInterrupted = true;
+                                stompSession.disconnect();
                             }
                         }
                     }

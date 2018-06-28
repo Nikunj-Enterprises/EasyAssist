@@ -9,13 +9,14 @@
         <script src="/webjars/stomp-websocket/stomp.min.js"></script>
         <style>
             .chatbox{
-                height: 200px;
+                height: 300px;
+                width : 300px;
                 border: 25px black;
-                padding: 25px;
-                margin: 25px;
+                overflow:scroll;
             }
             .container{
-                height: 300px;
+                height: 450px;
+                width: 350px;
                 border: 25px black;
             }
         </style>
@@ -41,9 +42,20 @@
                $("#callBtn").text("Calling for Assistance");
                blinking($("#callBtn"));
             });
+            $("#callChatBotBtn").click(function() {
+               connect();
+               $.ajax({url: "http://localhost:8080/chatbot/connect/"+$("#clientId").val(), success: function(result){
+                   // connected
+                }});
+            });
 
             $("#closechat").click(function() {
                disconnect();
+               $.ajax({url: "http://localhost:8080/chatbot/disconnect/"+$("#clientId").val(),
+                       type: 'DELETE',
+                       success: function(result){
+                                    // connected
+                      }});
                closeChatWindow();
             });
 
@@ -125,6 +137,7 @@
             function sendChatMessage(message){
                 stompClient.send("/assistance/"+$("#clientId").val()+"/chat/"+$("#helperId").val(),{}, message);
                 addChatMessage($("#clientId").val(), message);
+                $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
             };
 
             function addChatMessage(user, message){
@@ -135,6 +148,7 @@
                 $("#chat").hide();
                 $("#callerDiv").show();
                 $("#helperId").val("");
+                $("#chatbox").empty();
             };
         });
     </script>
@@ -145,24 +159,28 @@
         <input id="clientId" type="hidden">
         <input id="helperId" type="hidden">
         <div id="main-content" class="container">
-            <div id="application"><u>EasyAssist</u></div>
-            <br/>
+            <div id="application" align="center"><u>EasyAssist</u></div>
+            <p/><p/>
             <div id="loginDiv">
-                UserId  : <span/><input id="userId" type="text">
-                Password: <span/><input id="password" type="text">
-                <br/>
+                UserId  :<p/> <input id="userId" type="text">
+                <p/>
+                Password:<p/> <input id="password" type="text">
+                <p/>
                 <button id="loginBtn">Login</button>
             </div>
+            <p/><p/>
             <div id="callerDiv">
                 <button id="callBtn">Click to call for Assistance</button>
+                <p align="center">or<p/>
+                <button id="callChatBotBtn">Click to call for Chat Bot</button>
             </div>
             <div id="chat">
-                <button id="closechat">Close Chat</button>
+                <button id="closechat" style="width:300px;">Close Chat</button>
                 <br/>
-                <div id="chatbox" class="chatbox"></div>
+                <div id="chatbox" class="chatbox" ></div>
                 <br/>
-                <div id="sender">
-                    <input id="message" type="text"/><button id="send">send</button>
+                <div id="sender" style="width:300px;">
+                    <input id="message" type="text" width="75%"/><button id="send">send</button>
                 </div>
             </div>
         </div>
