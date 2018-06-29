@@ -23,6 +23,8 @@
     </head>
     <script>
         $(document).ready(function(){
+            var chatbotUrl = "http://18.236.135.76:8080/chatbot";
+            //var chatbotUrl = "http://192.168.0.7:8080/chatbot";
             $("#chat").hide();
             $("#callerDiv").hide();
             $("#loginDiv").show();
@@ -34,27 +36,28 @@
                   $("#chat").hide();
                   $("#callerDiv").show();
                   $("#loginDiv").hide();
+                  connect();
                }
             });
 
             $("#callBtn").click(function() {
-               connect();
+               //connect();
                $("#callBtn").text("Calling for Assistance");
                blinking($("#callBtn"));
             });
             $("#callChatBotBtn").click(function() {
-               connect();
-               $.ajax({url: "http://localhost:8080/chatbot/connect/"+$("#clientId").val(), success: function(result){
-                   // connected
+               //connect();
+               $.ajax({url: chatbotUrl+"/connect/"+$("#clientId").val(), success: function(result){
+                   //connected
                 }});
             });
 
             $("#closechat").click(function() {
                disconnect();
-               $.ajax({url: "http://localhost:8080/chatbot/disconnect/"+$("#clientId").val(),
+               $.ajax({url: chatbotUrl+"/disconnect/"+$("#clientId").val(),
                        type: 'DELETE',
                        success: function(result){
-                                    // connected
+                                    // disconnected
                       }});
                closeChatWindow();
             });

@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 
 import org.alicebot.ab.Bot;
 import org.alicebot.ab.Chat;
+import org.alicebot.ab.MagicBooleans;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.core.MessageSendingOperations;
@@ -15,8 +17,10 @@ import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandler;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.messaging.support.GenericMessage;
+import org.springframework.stereotype.Controller;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -38,15 +42,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 import in.nikunj.assistserver.model.ChatMessage;
+import in.nikunj.assistserver.model.HelpRequested;
 
-
-@RestController
+@Controller
 @RequestMapping("/chatbot")
 public class ChatBotController {
-    private ConcurrentHashMap<String, Thread> botRegistry = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, Thread> botRegistry = new ConcurrentHashMap<>();
     @Autowired
     private MessageSendingOperations<String> messagingTemplate;
 
+    @Value("${spring.chatbot.resource.path}")
+    private String resourcesPath;
+
+    @CrossOrigin
     @RequestMapping(value = "/connect/{userId}", method = RequestMethod.GET )
     public void connectToChatBot(@PathVariable("userId") String userId){
         if(botRegistry.containsKey(userId)) {
@@ -74,7 +82,7 @@ public class ChatBotController {
                         WebSocketStompClient stompClient = new WebSocketStompClient(sockJsClient);
 
                         String url = "ws://{host}:{port}/assistance-websocket";
-                        return stompClient.connect(url, headers, new MyHandler(), "localhost", 8080);
+                        return stompClient.connect(url, headers, new MyHandler(), "127.0.0.1", 8080);
                     }
 
                     public void subscribe(StompSession stompSession) throws ExecutionException, InterruptedException {
@@ -90,12 +98,14 @@ public class ChatBotController {
                                 String payloadStr = new String((byte[])payload);
                                 Gson gson = new Gson(); // Or use new GsonBuilder().create();
                                 ChatMessage chatMessage = gson.fromJson(payloadStr, ChatMessage.class);
-                                String message = chatSession.multisentenceRespond(chatMessage.getMessage().trim());
+                                if(chatMessage.getRepliedBy().equals(userId) && chatMessage.getRepliedTo().equals("bot4"+userId)) {
+                                    String message = chatSession.multisentenceRespond(chatMessage.getMessage().trim());
 
-                                chatMessage.setMessage(message);
-                                chatMessage.setRepliedTo(userId);
-                                chatMessage.setRepliedBy("bot4"+userId);
-                                messagingTemplate.convertAndSend("/topic/assistance/"+userId, gson.toJson(chatMessage));
+                                    chatMessage.setMessage(message);
+                                    chatMessage.setRepliedTo(userId);
+                                    chatMessage.setRepliedBy("bot4" + userId);
+                                    messagingTemplate.convertAndSend("/topic/assistance/" + userId, gson.toJson(chatMessage));
+                                }
                             }
                         });
                     }
@@ -103,24 +113,22 @@ public class ChatBotController {
                     class MyHandler extends StompSessionHandlerAdapter {
                         public void afterConnected(StompSession stompSession, StompHeaders stompHeaders) {
                             //logger.info("Now connected");
-                            /*try {
-                                subscribe(stompSession);
-                            } catch (ExecutionException e) {
+                            try {
+                                Thread.sleep(500);
+                                String message =
+                                        JSONObject.stringToValue( "{\"helpSeekerId\":\""+userId+"\", \"acknowledgedBy\":\"bot4"+userId+"\"}").toString();
+                                messagingTemplate.convertAndSend("/topic/assistance", message);
+                            } catch (Exception e) {
                                 e.printStackTrace();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }*/
-                            String message =
-                                    JSONObject.stringToValue( "{\"helpSeekerId\":\""+userId+"\", \"acknowledgedBy\":\"bot4"+userId+"\"}").toString();
-                            messagingTemplate.convertAndSend("/topic/assistance", message);
+                            }
                         }
                     }
 
                     @Override
                     public void run() {
-                        String resourcesPath = "C:/work/android_workspace/EasyAssist/assistserver/src/main/resources";
+                        //String resourcesPath = "C:/work/android_workspace/EasyAssist/assistserver/src/main/resources";
 
-                        //MagicBooleans.trace_mode = TRACE_MODE;
+                        MagicBooleans.trace_mode = false;
                         Bot bot = new Bot("super", resourcesPath);
                         chatSession = new Chat(bot);
                         bot.brain.nodeStats();
@@ -128,10 +136,14 @@ public class ChatBotController {
                         long startTS = Calendar.getInstance().getTimeInMillis();
                         try {
                             stompSession = connect().get();
-                            Thread.sleep(500);
+                            //Thread.sleep(500);
                             subscribe(stompSession);
                         }catch (Exception ex){
                             ex.printStackTrace();
+                            isInterrupted = true;
+                            stompSession.disconnect();
+                            stompSession = null;
+                            chatSession = null;
                         }
 
                         while (!isInterrupted
@@ -142,6 +154,8 @@ public class ChatBotController {
                                 e.printStackTrace();
                                 isInterrupted = true;
                                 stompSession.disconnect();
+                                stompSession = null;
+                                chatSession = null;
                             }
                         }
                     }
@@ -150,6 +164,7 @@ public class ChatBotController {
         botRegistry.get(userId).start();
     }
 
+    @CrossOrigin
     @RequestMapping(value = "/disconnect/{userId}", method = RequestMethod.DELETE )
     public void disconnectChatBot(@PathVariable("userId") String userId){
         if(botRegistry.containsKey(userId)) {
