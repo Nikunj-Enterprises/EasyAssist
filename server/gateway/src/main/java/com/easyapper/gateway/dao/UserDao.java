@@ -44,8 +44,9 @@ public class UserDao {
             Query query = new Query();
             query.addCriteria(Criteria.where("username").is(userId).and("isEnabled").is(true));
             UserRoles userRoles = mongoTemplate.findOne(query,UserRoles.class,appId+"_users");
-            if(userRoles != null)
+            if(userRoles != null && userRoles.getRoles() !=null){
                roles.addAll(Arrays.asList(userRoles.getRoles()));
+            }
         }
         return roles;
     }

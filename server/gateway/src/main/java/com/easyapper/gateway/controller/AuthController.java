@@ -12,6 +12,7 @@ import com.easyapper.gateway.util.ResponseMessage;
 import com.easyapper.gateway.util.UserAuthenticationRequest;
 import com.easyapper.gateway.util.UserAuthenticationResponse;
 import com.easyapper.gateway.util.UserValidationRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +84,7 @@ public class AuthController {
             @RequestBody UserAuthenticationRequest authRequest
     ){
         ContextHolder.setAppContext(new AppContext(appId));
-        String userId = authRequest.getUserId();
+        String userId = authRequest.getUsername();
 
         UserAuthenticationResponse responseObj = new UserAuthenticationResponse();
         try {
@@ -116,8 +117,7 @@ public class AuthController {
         ContextHolder.setAppContext(new AppContext(appId));
         UserAuthenticationResponse responseObj = new UserAuthenticationResponse();
         try {
-            if(userId.equals(AuthUtil.getUserIdFromContextId(authToken)) &&
-               appId.equals(AuthUtil.getCompanyIdFromContextId(authToken))) {
+            if(userId.equals(AuthUtil.getUserIdFromContextId(authToken)) ) {
 
                 log.debug(" refresh AuthToken for userId :{} , companyId : {}", userId, appId);
 
@@ -154,7 +154,9 @@ public class AuthController {
         if (AuthUtil.isContextIdValid(contextId, userDetails)) {
             Collection<SimpleGrantedAuthority> authorities =
                     (Collection<SimpleGrantedAuthority>) userDetails.getAuthorities();
-            if(authorities.contains(new SimpleGrantedAuthority(requiredRole))){
+            if( requiredRole == null || requiredRole.isEmpty()
+             || authorities.contains(new SimpleGrantedAuthority(requiredRole))
+              ){
                 responseMessage.setStatus("Success");
                 responseMessage.setMessage("valid");
                 return ResponseEntity.ok(responseMessage);
