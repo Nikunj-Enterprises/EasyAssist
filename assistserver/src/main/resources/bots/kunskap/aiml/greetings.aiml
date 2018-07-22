@@ -1,0 +1,147 @@
+<aiml>
+   <category>
+      <pattern> 
+	     <set>greetings</set> ^
+	  </pattern>
+      
+      <template>
+		 Hello there! How can I help you?
+		 <think><set name="context">no_context</set></think>
+      </template>  
+   </category>  
+
+   <category>
+         <pattern>
+      	      ^
+      	  </pattern>
+      	  <template>
+      	         Sorry. I don't have answer. Would you like to see inquiry options?
+      	         <think><set name="context">no_context</set></think>
+      	  </template>
+   </category>
+
+   <category>
+      <pattern>YES</pattern>
+	  <template>
+	      <condition name="context">
+             <li value="no_context"> <srai>INQUIRY</srai> </li>
+          </condition>
+	  </template>
+   </category>   
+   
+   <category>
+      <pattern>NO</pattern>
+	  <template>
+          <condition name="context">
+             <li value="no_context"> <srai>^ Option Not listed here ^</srai> </li>
+          </condition>
+	  </template>
+   </category>
+   
+   <category>
+      <pattern>INQUIRY</pattern>
+      <template>
+		 Please type in inquiry category you would be interested in:
+		 (1) School Timings
+		 (2) School curriculum
+		 (3) School Admission Process
+		 (4) School Branches
+		 (5) Option Not listed here
+		 <think><set name="context">inquiry_option</set></think>
+      </template>
+   </category> 
+
+
+   
+   <category>
+      <pattern>
+	     ^ Option Not listed here ^
+	  </pattern>
+	  <template><think><set name="context"/>no_option</think>
+	     Oh Ok! You can chat with my human colleague Or ask us to call you back.
+	     [connect operator(CO) | call me(CM)]
+	  </template>
+   </category>
+   
+   <category>
+      <pattern>^ List inquiry options ^</pattern>
+      <template>
+      	  <srai>INQUIRY</srai>
+      </template>
+   </category>
+
+   <category>
+
+      <pattern>
+	     ^ school timings ^
+	  </pattern>
+	  <template>
+	  <think><set name="context">inquiry_timing</set></think>
+	  On regular days it's 7 am to 3 pm.
+	  [List inquiry options(L) | Call me(CM) | exit ]
+	  </template>
+   </category>
+   <category>
+      <pattern>
+	     ^ school timing ^
+	  </pattern>
+	  <template>
+	     <srai>^ school timings ^</srai>
+	  </template>
+   </category>
+
+   <category>
+      <pattern>
+	     ^ school curriculum ^
+	  </pattern>
+	  <template>.<think><set name="context">inquiry_curriculum</set></think>
+	     We follow a KED methodology. The KED program is a concept for personalized education.
+		 This means that students, with the guidance of their coach, set and work towards
+		 their own personal goals, with the ambition of achieving high final results. Check
+		 the following link for more details: http://ked.edu.in/ked-program/educational-philosophy/
+		 [List inquiry options(L) | Call me(CM) | exit ]
+	  </template>
+   </category>
+
+   <category>
+      <pattern>
+	     ^ school Admission ^
+	  </pattern>
+	  <template><think><set name="context">inquiry_admission</set></think>
+	     There will be lot of draw for all the registered parents.
+		 Register yourself here http://ked.edu.in/gurgaon/admission-gurgaon/
+		 [List inquiry options(L) | Call me(CM) | exit ]
+	  </template>
+   </category>
+
+   <category>
+      <pattern>
+	     ^ School Branches ^
+	  </pattern>
+	  <template>
+	     [search(https://www.google.com/maps/search/kunskapsskolan+gurgaon/@28.4307302,76.9787033,12z/data=!3m1!4b1)]
+		 <srai>INQUIRY</srai>
+	  </template>
+   </category>
+
+   <category>
+      <pattern>
+   	      <set>digit</set>
+   	  </pattern>
+   	  <template>
+   	     <think><set name="option"><input/></set></think>
+   	     <condition name="context">
+   		    <li value="inquiry_option">
+   			  <condition name="option">
+   			    <li value="1"><srai>^ school timings ^</srai></li>
+   				<li value="2"><srai>^ school curriculum ^</srai></li>
+   				<li value="3"><srai>^ school admission ^</srai></li>
+   				<li value="4"><srai>^ School Branches ^</srai></li>
+   				<li value="5"><srai>^ Option Not listed here ^</srai></li>
+   				<li>Please select one of given option only</li>
+   			  </condition>
+   			</li>
+   		 </condition>
+   	  </template>
+   </category>
+</aiml>

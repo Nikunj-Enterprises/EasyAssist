@@ -100,7 +100,7 @@ public class ChatBotController {
                                 ChatMessage chatMessage = gson.fromJson(payloadStr, ChatMessage.class);
                                 if(chatMessage.getRepliedBy().equals(userId) && chatMessage.getRepliedTo().equals("bot4"+userId)) {
                                     String message = chatSession.multisentenceRespond(chatMessage.getMessage().trim());
-
+                                    message = preprocess(message);
                                     chatMessage.setMessage(message);
                                     chatMessage.setRepliedTo(userId);
                                     chatMessage.setRepliedBy("bot4" + userId);
@@ -108,6 +108,11 @@ public class ChatBotController {
                                 }
                             }
                         });
+                    }
+
+                    private String preprocess(String message){
+
+                        return message;
                     }
 
                     class MyHandler extends StompSessionHandlerAdapter {
@@ -129,7 +134,7 @@ public class ChatBotController {
                         //String resourcesPath = "C:/work/android_workspace/EasyAssist/assistserver/src/main/resources";
 
                         MagicBooleans.trace_mode = false;
-                        Bot bot = new Bot("super", resourcesPath);
+                        Bot bot = new Bot("kunskap", resourcesPath);
                         chatSession = new Chat(bot);
                         bot.brain.nodeStats();
                         StompSession stompSession = null;
