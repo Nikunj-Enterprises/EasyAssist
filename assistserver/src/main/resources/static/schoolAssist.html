@@ -109,8 +109,8 @@
 	<script>
         $(document).ready(function(){
 		   console.log("page loaded!!");
-		   //var chatbotUrl = "http://18.236.135.76:8080/chatbot";
-		   var chatbotUrl = "http://192.168.0.7:8080/chatbot";
+		   var chatbotUrl = "http://18.236.135.76:8090/chatbot";
+		   //var chatbotUrl = "http://192.168.0.7:8090/chatbot";
 		   //$("#clientId").val("school");
 		   $.ajax({url: chatbotUrl+"/connect/"+$("#clientId").val(), success: function(result){
                    //connected

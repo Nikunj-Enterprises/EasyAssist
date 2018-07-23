@@ -82,7 +82,7 @@ public class ChatBotController {
                         WebSocketStompClient stompClient = new WebSocketStompClient(sockJsClient);
 
                         String url = "ws://{host}:{port}/assistance-websocket";
-                        return stompClient.connect(url, headers, new MyHandler(), "127.0.0.1", 8080);
+                        return stompClient.connect(url, headers, new MyHandler(), "127.0.0.1", 8090);
                     }
 
                     public void subscribe(StompSession stompSession) throws ExecutionException, InterruptedException {

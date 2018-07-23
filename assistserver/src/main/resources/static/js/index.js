@@ -14,8 +14,8 @@
        this.stompClient.subscribe(topic, callback);
     },
 	connect: function() {
-        //To Revisit		
-	    $('#clientId').val('school');
+        var id = new Date().getTime()
+	    $('#clientId').val(id);
 	    var self = this;
         //var socket = new SockJS('/assistance-websocket');
         function callback(message){
@@ -85,7 +85,7 @@
     addMessage: function() {
       this.messageToSend = this.$textarea.val()
 	  //To Revisit
-	  this.stompClient.send("/assistance/"+$("#clientId").val()+"/chat/bot4school",{}, this.messageToSend);
+	  this.stompClient.send("/assistance/"+$("#clientId").val()+"/chat/bot4"+$("#clientId").val(),{}, this.messageToSend);
       this.render();         
     },
     addMessageEnter: function(event) {
