@@ -109,10 +109,38 @@ public class ChatBotController {
                             }
                         });
                     }
-
+                    // breaks lines to fit chat bubble area
                     private String preprocess(String message){
+                        if(message.equals("[command(cm)]")){
+                            String formStr = "<style> form { display: block; margin-top: 0em; \n"+
+                                    "padding: 10px 6px 5px 10px;margin:5px auto;}</style>\n"+
+                                    "submit the form and we will get in touch:\n"+
+                                    "<form>\n" +
+                                    "  Full Name : <input type=\"text\" name=\"firstname\"><br>\n" +
+                                    "  Contact no: <input type=\"text\" name=\"lastname\"><br>\n" +
+                                    "  Email ID &nbsp; : <input type=\"text\" name=\"email\"><br>\n" +
+                                    "  <input type=\"submit\" value=\"Submit\">\n" +
+                                    "</form>";
 
-                        return message;
+                            return formStr;
+                        }
+                        StringBuilder builder = new StringBuilder();
+                        int len = 0;
+                        String[] words = message.split(" ");
+                        for(String word : words){
+                            len += word.length()+1;
+
+                            if(word.contains("\n")){
+                                len = 0;
+                            }
+                            if(len > 45){
+                                builder.append('\n');
+                                len = 0;
+                            }
+                            builder.append(word);
+                            builder.append(" ");
+                        }
+                        return builder.toString();
                     }
 
                     class MyHandler extends StompSessionHandlerAdapter {

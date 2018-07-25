@@ -4,8 +4,7 @@
 	     <set>greetings</set> ^
 	  </pattern>
       
-      <template>
-		 Hello there! How can I help you?
+      <template>Hello there! How can I help you?
 		 <think><set name="context">no_context</set></think>
       </template>  
    </category>  
@@ -16,13 +15,11 @@
       	  </pattern>
       	  <template>
 		    <condition name="context">
-              <li value="no_context">
-      	         Sorry. I don't understand that.
-      	         Would you like to see inquiry options?
+              <li value="no_context">Sorry. I don't understand that. Would you like to see inquiry options?
 			  </li>
-			  <li value="inquiry_option">
-			     Please choose from given options only!
+			  <li value="inquiry_option">Please choose from given options only!
 			  </li>
+			  <li>hmmm <think><set name="context">no_context</set></think></li>
             </condition>
       	  </template>
    </category>
@@ -33,7 +30,8 @@
 	  </pattern>
 	  <template>
 	      <condition name="context">
-             <li value="no_context"> <srai>INQUIRY</srai> </li>
+             <li value="no_context"><srai>INQUIRY</srai> </li>
+			 <li><set name="context">No_Context</set> <srai>^</srai></li>
           </condition>
 	  </template>
    </category>   
@@ -44,14 +42,14 @@
 	  <template>
           <condition name="context">
              <li value="no_context"> <srai>^ Option Not listed here ^</srai> </li>
+			 <li><set name="context">No_Context</set> <srai>^</srai></li>
           </condition>
 	  </template>
    </category>
    
    <category>
       <pattern>INQUIRY</pattern>
-      <template>
-		 Please type in inquiry category from below:
+      <template>Please type in inquiry category from below:
 		 (1) School Timings
 		 (2) School curriculum
 		 (3) School Admission Process
@@ -65,17 +63,18 @@
       <pattern>
 	     ^ Option Not listed here ^
 	  </pattern>
-	  <template><think><set name="context">no_option</set></think>
-	     Oh Ok! You can chat with my human colleague
-	     Or ask us to call you back.
+	  <template>
+	     <think>
+		    <set name="context">no_option</set>
+	     </think>Oh Ok! You can chat with my human colleague Or ask us to call you back.
+		 
 	     [connect operator(CO) | call me(CM) | exit]
 	  </template>
    </category>
    
    <category>
       <pattern>^ List inquiry options ^</pattern>
-      <template>
-      	  <srai>INQUIRY</srai>
+      <template><srai>INQUIRY</srai>
       </template>
    </category>
 
@@ -84,11 +83,23 @@
 	     ^ school timings ^
 	  </pattern>
 	  <template>
-	  <think><set name="context">inquiry_timing</set></think>
-	  On regular days it's 7 am to 3 pm.
+	  <think>
+	     <set name="context">inquiry_timing</set>
+	  </think>On regular days it's 7 am to 3 pm.
+	  
 	  [List inquiry options(L) | Call me(CM) | exit ]
 	  </template>
    </category>
+   
+   <category>
+      <pattern>
+	     ^ your timings ^
+	  </pattern>
+	  <template>
+	     <srai>^ school timings ^</srai>
+	  </template>
+   </category>
+   
    <category>
       <pattern>
 	     ^ school timing ^
@@ -102,28 +113,36 @@
       <pattern>
 	     ^ school curriculum ^
 	  </pattern>
-	  <template>.<think><set name="context">inquiry_curriculum</set></think>
-	     We follow a KED methodology. The KED program is
-	     a concept for personalized education.
-		 This means that students, with the guidance of
-		 their coach, set and work towards their own
-		 personal goals, with the ambition of achieving
-		 high final results. Check the following link
-		 for more details:
-		 http://ked.edu.in/ked-program/educational-philosophy/
+	  <template>
+	  <think>
+	    <set name="context">inquiry_curriculum</set>
+	  </think>We follow a KED methodology. The KED program is a concept for personalized education.
+		 This means that students, with the guidance of their coach, set and work towards their own personal goals, with the ambition of achieving high final results. Check the following link for more details:&lt;a target="_blank" href="http://ked.edu.in/ked-program/educational-philosophy/"&gt;ked philosophy&lt;/a&gt;
+		 
 		 [List inquiry options(L) | Call me(CM) | exit ]
 	  </template>
    </category>
 
    <category>
       <pattern>
+	     ^ your curriculum ^
+	  </pattern>
+	  <template>
+	     <srai>^ school curriculum ^</srai>
+	  </template>
+   </category>
+   
+   <category>
+      <pattern>
 	     ^ school Admission ^
 	  </pattern>
-	  <template><think><set name="context">inquiry_admission</set></think>
-	     There will be lot of draw for all the
-	     registered parents. Register yourself here:
-		 http://ked.edu.in/gurgaon/admission-gurgaon/
-		 [List inquiry options(L) | Call me(CM) | exit ]
+	  <template>
+	  <think>
+	     <set name="context">inquiry_admission</set>
+	  </think>There will be lot of draw for all the registered parents. Register yourself here:	
+	  &lt;a target="_blank" href="http://ked.edu.in/gurgaon/admission-gurgaon"&gt;admission at gurgaon &lt;/a&gt;
+	  
+	  [List inquiry options(L) | Call me(CM) | exit ]
 	  </template>
    </category>
 
@@ -132,7 +151,8 @@
 	     ^ School Branches ^
 	  </pattern>
 	  <template>
-	     [search(&lt;a href="https://www.google.com/maps/search/kunskapsskolan+gurgaon/@28.4307302,76.9787033,12z/data=!3m1!4b1"&gt;google map&lt;/a&gt;)]
+	     [search(&lt;a target="_blank" href="https://www.google.com/maps/search/kunskapsskolan+gurgaon/@28.4307302,76.9787033,12z/data=!3m1!4b1"&gt;google map&lt;/a&gt;)]
+		 
 		 <srai>INQUIRY</srai>
 	  </template>
    </category>
@@ -172,6 +192,7 @@
                  <li value="inquiry_admission">
                      <srai>INQUIRY</srai>
                  </li>
+				 <li><set name="context">No_Context</set> <srai>^</srai></li>
       		 </condition>
       	  </template>
       </category>
@@ -196,9 +217,7 @@
 				<li value="inquiry_option">
 				   <srai>^</srai>
 				</li>
-				<li>
-				   <srai>^</srai>
-				</li>
+				<li><set name="context">No_Context</set> <srai>^</srai></li>
               </condition>
           </template>
     </category>
@@ -212,31 +231,43 @@
                <li value="no_option">
                 	<srai>Call Operator</srai>
                 </li>
+				<li><set name="context">No_Context</set> <srai>^</srai></li>
            </condition>
          </template>
      </category>
+	 
 	 <category>
 	    <pattern>List inquiry options</pattern>
 		<template>
 		   <srai>INQUIRY</srai>
 		</template>
 	 </category>
+	 
 	 <category>
 	    <pattern>Connect Operator</pattern>
 		<template>
 		   <srai>Call Operator</srai>
 		</template>
 	 </category>
+	 
 	 <category>
 	    <pattern>Call Operator</pattern>
 		<template>
 		   [command(co)]
 		</template>
 	 </category>
+	 
 	 <category>
 	    <pattern>Call Me</pattern>
 		<template>
 		   [command(cm)]
+		</template>
+	 </category>
+	 
+	 <category>
+	    <pattern><set>thank</set></pattern>
+		<template>
+		   You are most welcome :)
 		</template>
 	 </category>
 </aiml>

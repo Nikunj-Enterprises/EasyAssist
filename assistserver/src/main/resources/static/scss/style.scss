@@ -159,6 +159,8 @@ body {
     
     .my-message {
       background: $green;
+      white-space: pre;
+      text-align: left;
     }
     
     .other-message {

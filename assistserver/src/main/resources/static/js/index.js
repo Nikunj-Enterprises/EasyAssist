@@ -27,13 +27,17 @@
             if(repliedBy !== null && repliedBy !== ""){
                // To Revisit
                console.log("Received message ::"+content);
-               var templateResponse = Handlebars.compile( $("#message-response-template").html());
-               var contextResponse = {
-                         response: content,
-                         time: self.getCurrentTime()
-                       };
-               self.$chatHistoryList.append(templateResponse(contextResponse));
-               self.scrollToBottom();
+               if(content === '[command(cm)]'){
+
+               }else{
+                   var templateResponse = Handlebars.compile( $("#message-response-template").html());
+                   var contextResponse = {
+                             response: content,
+                             time: self.getCurrentTime()
+                           };
+                   self.$chatHistoryList.append(templateResponse(contextResponse));
+                   self.scrollToBottom();
+               }
             }
         };
         //this.stompClient = Stomp.over(socket);

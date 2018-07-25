@@ -18,7 +18,6 @@
 	Seems your browser doesn't support Javascript! Websocket relies on Javascript being enabled. Please enable Javascript and reload this page!
 	</h2></noscript>
     <input id="clientId" type="hidden">
-    <input id="helperId" type="hidden">
     <div id="main_container" class="container clearfix">
     <div class="people-list" id="people-list">
       
@@ -43,8 +42,8 @@
         
       </ul>
     </div>
-    
-    <div class="chat">
+
+    <div id="chatBox" class="chat">
       <div class="chat-header clearfix">
         <img src="images/kunskaps_avatar.jpg" alt="avatar" />
         
@@ -96,7 +95,7 @@
 		  <span class="message-data-time">{{time}}, Today</span>
 		</div>
 		<div class="message my-message">
-		  {{response}}
+		  {{{response}}}
 		</div>
 	  </li>
 	</script>
@@ -115,6 +114,8 @@
 		   $.ajax({url: chatbotUrl+"/connect/"+$("#clientId").val(), success: function(result){
                    //connected
                 }});
+
+           $("#loginDiv").hide();
 		});
 		
 	</script>

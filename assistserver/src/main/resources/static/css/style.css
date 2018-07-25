@@ -106,17 +106,17 @@ body {
 }
 .chat .chat-history .message {
   color: white;
-  padding: 18px 20px;
+  padding: 14px 16px;
   line-height: 26px;
-  font-size: 16px;
+  font-size: 14px;
   border-radius: 7px;
   margin-bottom: 30px;
-  width: 90%;
+  width: 92%;
   position: relative;
 }
 .chat .chat-history .message:after {
   bottom: 100%;
-  left: 7%;
+  left: 5%;
   border: solid transparent;
   content: " ";
   height: 0;
@@ -124,8 +124,8 @@ body {
   position: absolute;
   pointer-events: none;
   border-bottom-color: #86BB71;
-  border-width: 10px;
-  margin-left: -10px;
+  border-width: 8px;
+  margin-left: -8px;
 }
 .chat .chat-history .my-message {
   background: #86BB71;
